@@ -1,5 +1,4 @@
 /**
- *
  * @description Merges given classes into one string.
  * @param {String[]|Object<String,Boolean>} [classes=[]] Classes to be processed.
  * Either an array of strings or an object where each keys value is the determinator

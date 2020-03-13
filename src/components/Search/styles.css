@@ -3,15 +3,17 @@
   --maxRowsVisible: 5;
   --maxHeight: calc(var(--maxRowsVisible) * var(--rowHeight));
   --smoothTrans: 0.15s all ease-in-out;
-  --iconSearchWidth: 35px;
+  --iconWidth: 35px;
   --iconSize: 20px;
   --iconColorLight: rgb(0, 110, 255);
   --iconColorDark: rgb(3, 63, 143);
   --inputPadding: 3px;
-  --searchWidth: calc(100% - var(--iconSearchWidth));
+  --searchWidth: calc(100% - var(--iconWidth));
   --hoverBg: #34a1ff;
   --textColor: rgba(0, 0, 0, 0.555);
   --highlightedTextColor: rgba(0, 0, 0, 1);
+  --arrowColor: rgb(0, 136, 226);
+  --itemHoverBorderColor: rgba(0, 136, 226, 0.5);
 }
 
 .no-border {
@@ -35,17 +37,13 @@
   clear: both;
 }
 
-.search-box__wrapper.with-pin > * {
-  /* padding-right: var(--iconSearchWidth); */
-}
-
 .search-box__wrapper > .pin-search-list {
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
   text-align: center;
-  width: var(--rowHeight);
+  width: var(--iconWidth);
   height: var(--rowHeight);
 }
 
@@ -79,34 +77,28 @@
   border-bottom: 1px solid #e1e1e1;
   padding: 5px 10px;
   width: 100%;
-}
-
-.search-list > .item:before,
-.search-list > .item:after {
-  content: "";
-  position: absolute;
-  display: block;
-  border-style: solid;
-  border-width: 7px 0 7px 7px;
-  left: 5px;
-  pointer-events: none;
-  _filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000');
-  opacity: 0;
-
-  transition: inherit;
+  height: var(--rowHeight);
+  font-size: 14px;
 }
 
 .search-list > .item:before {
-  border-color: transparent transparent transparent var(--hoverBg);
-  _border-color: #000000 #000000 #000000 var(--hoverBg);
-  z-index: 2;
-}
+  content: '';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  border: none;
+  border-top: 1px solid var(--arrowColor);
+  border-right: 1px solid var(--arrowColor);
+  background-color: transparent;
+  width: 6px;
+  height: 6px;
+  opacity: 0;
 
-.search-list > .item:after {
-  left: 7px;
-  border-color: transparent transparent transparent white;
-  _border-color: #000000 #000000 #000000 white;
-  z-index: 1;
+  transition: .25s all ease-in-out;
+  transform-origin: center;
+  transform: perspective(1px) translateY(-50%) rotateZ(45deg);
+  backface-visibility: hidden;
 }
 
 .search-list > .item.found:last-of-type {
@@ -133,20 +125,18 @@
 }
 
 .search-list > .item:hover {
-  background-color: var(--hoverBg);
   padding-left: 20px;
+  box-shadow: inset 0 0 0 1px var(--itemHoverBorderColor);
 }
 
-.search-list > .item:hover:before,
-.search-list > .item:hover:after {
+.search-list > .item:hover:before {
+  left: 5px;
   opacity: 1;
 }
 
-.search-list > .item:hover b {
-  color: white;
+.search-list > .item:hover > .text {
+  color: var(--highlightedTextColor);
 }
-
-
 
 .search-row {
   position: relative;
@@ -165,8 +155,9 @@
   justify-content: center;
   align-items: center;
   line-height: 1;
+  width: var(--iconWidth);
 
-  transform: translateX(var(--iconSearchWidth));
+  transform: translateX(var(--iconWidth));
 }
 
 .search-row > .search-icon:before {
@@ -184,7 +175,7 @@
 }
 
 .search-row > .search-icon:active {
-  transform: translateX(var(--iconSearchWidth)) scale(0.75);
+  transform: translateX(var(--iconWidth)) scale(0.75);
 }
 
 .search-row.focused > .search-icon:active {
@@ -214,7 +205,7 @@
   display: block;
   position: absolute;
   bottom: var(--inputPadding);
-  left: var(--iconSearchWidth);
+  left: var(--iconWidth);
   height: 0;
   border-bottom: 1px solid silver;
   z-index: -1;
@@ -259,21 +250,4 @@
 .search-list > .item,
 .search-list > .item * {
   cursor: pointer;
-}
-
-@supports (display: grid) {
-  .search-box__wrapper {
-    /* display: grid;
-    grid-auto-flow: row;
-    grid-auto-rows: var(--rowHeight) auto;
-    grid-row-gap: 5px;
-    flex-direction: unset; */
-  }
-
-  .search-row {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: var(--iconSearchWidth) 1fr;
-    /* grid-column-gap: var(--inputPadding); */
-  }
 }
