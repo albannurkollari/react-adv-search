@@ -1,128 +1,203 @@
+/* eslint-disable no-fallthrough */
+/* eslint-disable no-unused-expressions */
 // Libraries
-import React, {useEffect, useState, useCallback, useRef} from "react";
+import {useEffect, useState, useCallback, useRef} from "react";
 
 // Helpers
-import {events} from '../utils';
+import {scroll} from '../utils';
 
 // Constants
 import {CLS} from '../constants';
 
-// Memoized
-const toggleEvent = events.init();
-
 export const useSearch = (possibilities, onCallback) => {
+  // REFS
   const inputSearchRef = useRef();
   const searchRowRef = useRef();
+  const searchListRef = useRef();
+
+  // STATES
   const [filtered, setFiltered] = useState(possibilities);
-  const [menuIsToggled, setMenuIsToggled] = useState(false);
-  const toggleSearchVisibility = useCallback(({show} = {}) => {
-    const method = show ? "add" : "remove";
+  const [menuIsPinned, setMenuIsPinned] = useState();
+  const [hasFoundSome, setHasFoundSome] = useState(false);
+  const [isClean, setIsClean] = useState(true);
 
-    // eslint-disable-next-line no-unused-expressions
-    searchRowRef?.current.classList[method]?.(CLS.FOCUSED, show);
-  }, []);
-  const onSearchKeydown = useCallback(
-    ({keyCode, target}) => {
-      if (keyCode === 27) {
-        if (target.value.trim() !== "") {
-          target.value = "";
-        } else {
-          toggleSearchVisibility({show: false});
-        }
+  // CALLBACKS
+  const filterItemList = useCallback((searchFor = '') => {
+    let items;
+    let hasFoundItems = false;
 
-        setFiltered(possibilities);
-      }
-    },
-    [possibilities, setFiltered, toggleSearchVisibility]
-  );
-  const onSearch = useCallback(
-    ({target: {value: searchText}}) => {
-      if (searchText.trim() === "") {
-        return setFiltered(possibilities);
-      }
+    if (searchFor.trim().length) {
+      const _filtered = [];
+      const _nonFiltered = [];
 
-      let items = possibilities.map(({value, ...rest}) => {
-        const regex = new RegExp(`(${searchText})`, "gi");
+      possibilities.forEach(({value, ...rest}) => {
+        const regex = new RegExp(`(${searchFor})`, "gi");
+        const found = regex.test(value);
+        const item = {...rest, value, ...(found && {regex})};
 
-        if (regex.test(value)) {
-          const content = value
-            .replace(regex, "*$1*")
-            .split("*")
-            .map((item, i) =>
-              regex.test(item) ? <b key={`b-${i}`}>{item}</b> : item
-            )
-            .filter(Boolean);
-
-          return {...rest, value, content};
-        }
-
-        return {...rest, value};
+        (found ? _filtered : _nonFiltered).push(item);
       });
 
-      if (!menuIsToggled) {
-        items = items.filter(({content}) => content);
+      if (_filtered[_filtered.length - 1]) {
+        _filtered[_filtered.length - 1].isLastFound = true;
       }
 
-      items = items.map((item, i, {length}) => ({
-        ...item,
-        isLast: i === length - 1
-      }));
+      items = [..._filtered, ..._nonFiltered];
+      hasFoundItems = Boolean(_filtered.length);
+    }
 
-      setFiltered(items);
-    },
-    [possibilities, menuIsToggled]
-  );
-  const onSearchFocus = useCallback(
-    ({target}) => {
-      const isFocused = searchRowRef?.current.classList.contains(CLS.FOCUSED);
-      const iconTriggeredEvent = Boolean(target.closest(`.${CLS.SEARCH_ICON}`));
+    scroll.to({parent: searchListRef.current, isDisabled: true});
+    setHasFoundSome(hasFoundItems);
+    setFiltered(items || possibilities);
+    setIsClean(!inputSearchRef.current.value.trim().length);
+  }, [possibilities, setFiltered, setIsClean]);
 
-      iconTriggeredEvent
-        ? toggleSearchVisibility({show: !isFocused})
-        : toggleSearchVisibility({show: true});
+  const manageSearchState = useCallback(({show, event} = {}) => {
+    const method = (show ?? !searchRowRef?.current.classList.contains(CLS.FOCUSED)) ? 'add' : 'remove';
 
-      if (!isFocused && iconTriggeredEvent) {
-        // eslint-disable-next-line no-unused-expressions
-        inputSearchRef?.current.focus();
+    // Toggle search visibility here.
+    searchRowRef?.current.classList[method]?.(CLS.FOCUSED);
+
+    if (!show) {
+      inputSearchRef.current.value = '';
+      filterItemList();
+    }
+
+    if (method === 'add') {
+      inputSearchRef?.current.focus();
+    }
+  }, [filterItemList]);
+
+  const onSearchKeydown = useCallback(evt => {
+    const list = searchListRef.current;
+    const {keyCode, target, ctrlKey, shiftKey} = evt;
+    const {classList, clientHeight, scrollHeight, scrollTop} = list;
+    const _scroll = {
+      isDisabled: ctrlKey
+        || shiftKey
+        || (scrollHeight === clientHeight)
+        || !(classList.contains(CLS.PINNED) || hasFoundSome),
+      isAtStart: scrollTop === 0,
+      isInBetween: 0 < scrollTop && scrollTop < scrollHeight - clientHeight,
+      isAtEnd: scrollHeight - clientHeight === scrollTop,
+      parent: list
+    };
+    const pressed = {
+      isEnter: keyCode === 13,
+      isEsc: keyCode === 27,
+      isEnd: keyCode === 35,
+      isHome: keyCode === 36,
+      isUp: keyCode === 38,
+      isDown: keyCode === 40
+    };
+
+    const isNavigating = Object
+      .entries(pressed)
+      .some(([key, isPressed]) => /^is(end|home|up|down)$/i.test(key) && isPressed);
+
+    const prevOrNextProp = `${pressed.isUp ? 'previous' : 'next'}ElementSibling`;
+
+    switch (true) {
+      case pressed.isEnter:
+        break;
+      case pressed.isEsc:
+        if (target.value.trim() !== "") {
+          target.value = "";
+        }
+        else {
+          manageSearchState({show: false});
+        }
+
+        filterItemList();
+        break;
+      case pressed.isDown:
+      case pressed.isUp:
+        if (menuIsPinned && (_scroll.isAtStart || _scroll.isInBetween)) {
+          _scroll.elm = list.elmToScroll?.[prevOrNextProp] ?? list.querySelector(`.${CLS.ITEM}`);
+        }
+        else if (menuIsPinned && _scroll.isAtEnd) {
+          _scroll.elm = (list.elmToScroll ?? [...list.querySelectorAll(`.${CLS.ITEM}`)].pop())?.[prevOrNextProp];
+        }
+        else {
+          const allFound = [...list.querySelectorAll(`.${CLS.ITEM}.${CLS.FOUND}`)];
+          const selected = allFound.find(item => item.classList.contains(CLS.SELECTED));
+          const selectedIndex = allFound.indexOf(selected);
+          const newIndex = pressed.isUp
+            ? selectedIndex > -1 ? selectedIndex - 1 : 0
+            : selectedIndex > -1 ? selectedIndex + 1 : 0;
+
+          _scroll.elm = allFound[newIndex]
+        }
+        break;
+      default:
+        return;
+    }
+
+    if (isNavigating && (hasFoundSome || menuIsPinned)) {
+      if (_scroll.elm?.classList.contains(CLS.REPORT)) {
+        _scroll.elm = list.querySelector(`.${CLS.ITEM}`);
       }
-    },
-    [toggleSearchVisibility]
-  );
 
-  const hasFoundSome = filtered.some(({content}) => content);
+      evt.preventDefault();
+      scroll.to(_scroll, (prevElm, nextElm) => {
+        prevElm?.classList.remove(CLS.SELECTED);
+        nextElm?.classList.add(CLS.SELECTED);
+        nextElm?.click();
+      });
+    }
 
-  useEffect(() => {
-    const selector = `.${CLS.SEARCH_BOX}`;
-    const searchList = document.querySelector(selector);
+  }, [hasFoundSome, menuIsPinned, filterItemList, manageSearchState]);
+  const onSearch = useCallback(({target: {value}}) => filterItemList(value), [filterItemList]);
+  const onSearchClick = useCallback(() => manageSearchState(), [manageSearchState]);
+  const onSearchBlur = useCallback(() => menuIsPinned ?? filterItemList(), [menuIsPinned, filterItemList]);
+  const onItemSelect = useCallback(({target}) => {
+    const listElm = target.closest(`.${CLS.ITEM}`,);
+    const reportElm = target.closest(`.${CLS.REPORT}`)
 
-    if (!(searchList instanceof Element)) {
+    if (!(listElm instanceof Element) || reportElm) {
       return;
     }
 
-    const event = {
-      name: 'onOutsideSearchList',
-      type: 'click',
-      handler: ({target}) => {
-        if (!menuIsToggled && !target.closest(selector) && hasFoundSome) {
-          [...searchList?.children].forEach(item => item.classList.remove(CLS.FOUND));
-        }
-      }
+    const foundItem = possibilities.find(({key}) => key === listElm.searchId) || {};
+
+    if (foundItem) {
+      inputSearchRef.current.value = foundItem.value;
+
+      onCallback?.(foundItem);
     }
 
-    toggleEvent(event);
+  }, [possibilities, onCallback]);
+  const onPinnClick = useCallback(() => {
+    setMenuIsPinned(menuIsPinned ? undefined : true);
+    !isClean && !menuIsPinned && filterItemList(inputSearchRef.current.value);
+  }, [isClean, menuIsPinned, setMenuIsPinned, filterItemList]);
 
-    return () => toggleEvent(event);
-  }, [hasFoundSome, menuIsToggled]);
+  useEffect(() => {
+    if (!(searchListRef.current instanceof Element)) {
+      return;
+    }
+
+    searchListRef.current.querySelectorAll(`.${CLS.ITEM}`).forEach(listItem => {
+      const attrName = 'search-id';
+
+      listItem.searchId = listItem.getAttribute(attrName);
+      listItem.removeAttribute(attrName);
+    });
+  }, []);
 
   return {
+    isClean,
     hasFoundSome,
     inputSearchRef,
     searchRowRef,
+    searchListRef,
     filtered,
-    menuIsToggled,
-    setMenuIsToggled,
+    menuIsPinned,
     onSearchKeydown,
     onSearch,
-    onSearchFocus
+    onSearchClick,
+    onSearchBlur,
+    onItemSelect,
+    onPinnClick
   }
 };

@@ -11,50 +11,25 @@ import "./main.css";
 // Components
 import Search from "./components/Search";
 
-const possibilities = [
-  {
-    key: "bani",
-    value: "Alban Nurkollari"
-  },
-  {
-    key: "dona",
-    value: "Edona Rexhaj-Nurkollari"
-  },
-  {
-    key: "aro",
-    value: "Arjeta Nurkollari"
-  },
-  {
-    key: "bes",
-    value: "Besnik Nurkollari"
-  },
-  {
-    key: "edi",
-    value: "Edina Nurkollari-Bytyqi"
-  },
-  {
-    key: "beta",
-    value: "Bejtulla Bytyqi"
-  },
-  {
-    key: "roki",
-    value: "Roar Bytyqi"
-  },
-  {
-    key: "nik",
-    value: "Niklas Gullberg"
-  },
-  {
-    key: "nelly",
-    value: "Nelly"
-  }
-];
+// Helpers
+import {getAllCountries} from './api';
 
-ReactDOM.render(
-  <div className="App">
-    <Search possibilities={possibilities} />
-  </div>,
-  document.getElementById("root")
-);
+// Constants
+import {CLS, PEOPLE} from "./constants";
+
+// Start the app
+(async () => {
+  const countries = /^yes$/i.test(localStorage.countries) ? await getAllCountries() : [];
+  const possibilities = [...PEOPLE, ...countries];
+  const root = document.createElement('div');
+  root.className = CLS.ROOT;
+
+  ReactDOM.render(
+    <div className={CLS.APP_MAIN}>
+      <Search possibilities={possibilities} />
+    </div>,
+    document.body.insertBefore(root, document.body.firstChild)
+  );
+})();
 
 serviceWorker.unregister();
