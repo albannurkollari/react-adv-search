@@ -1,5 +1,5 @@
 import polyfills from "./polyfills";
 
 Promise.all(
-  polyfills.concat([import(/* webkpackChunkName: "main" */ "./main")])
+  polyfills.concat([import(/* webkpackChunkName: "main" */ "./views/Main")])
 );

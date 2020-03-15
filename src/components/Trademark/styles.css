@@ -1,0 +1,30 @@
+:root {
+  --heartRed: #ac1010;
+  --trademarkBlue: rgb(35, 45, 138);
+}
+
+.trademark {
+  display: flex;
+  padding: 5px 15px;
+  align-items: center;
+  color: #949494
+}
+
+.trademark svg * {
+  fill: inherit;
+}
+
+.trademark__hearts {
+  fill: var(--heartRed);
+  width: 15px;
+  height: 15px;
+}
+
+.trademark__erenndriel {
+  fill: var(--trademarkBlue);
+  width: 110px;
+  height: 30px;
+  border-bottom: 1px solid var(--trademarkBlue);
+  border-radius: 15%;
+  margin: 0 5px;
+}

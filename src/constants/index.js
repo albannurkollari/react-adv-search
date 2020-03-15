@@ -8,7 +8,6 @@ export const URLS = {COUNTRIES};
 
 export const CLS = {
   ROOT: 'root',
-  APP_MAIN: 'main',
   NO_GAP: 'no-gap',
   SEARCH_BOX: 'search-box__wrapper',
   SEARCH_BOX_WITH_PIN: 'with-pin',

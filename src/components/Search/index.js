@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 // Libraries
 import PropTypes from "prop-types";
-import React from "react";
+import React, {useEffect} from "react";
 
 // Helpers
 import {classes} from "../../utils";
@@ -22,6 +22,7 @@ import {CLS, LABELS} from '../../constants';
 const Search = ({
   labels: {iconTooltip, pinTooltip, searchPlaceholder, found, notFound},
   possibilities,
+  rowsVisible,
   toggleList,
   onCallback
 }) => {
@@ -41,13 +42,17 @@ const Search = ({
     onItemSelect
   } = useSearch(possibilities, onCallback);
 
+  useEffect(() => {
+    document.documentElement.style.setProperty('--maxRowsVisible', rowsVisible);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className={classes.get({
         [CLS.SEARCH_BOX]: true,
         [CLS.SEARCH_BOX_WITH_PIN]: toggleList
       })}
-      style={{"--maxRowsVisible": 5}}
     >
       {possibilities.length && (
         <>
@@ -124,6 +129,7 @@ Search.propTypes = {
     notFound: PropTypes.string,
   }),
   possibilities: PropTypes.array.isRequired,
+  rowsVisible: PropTypes.number,
   toggleList: PropTypes.bool,
   onCallback: PropTypes.func
 };
@@ -135,6 +141,7 @@ Search.defaultProps = {
     found: LABELS.REPORTS.FOUND,
     notFound: LABELS.REPORTS.NO_RESULT
   },
+  rowsVisible: 5,
   toggleList: true,
   onCallback: undefined
 };
