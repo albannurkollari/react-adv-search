@@ -31,10 +31,6 @@ export const scroll = {
   * scrolled elements.
   */
   to: ({parent, elm, isDisabled = false} = {}, onCallback) => {
-    if (!(elm instanceof Element)) {
-      elm = parent.elmToScroll;
-    }
-
     const prevElm = parent.elmToScroll;
 
     if (isDisabled) {

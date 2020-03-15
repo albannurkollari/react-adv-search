@@ -3,11 +3,14 @@
   --trademarkBlue: rgb(35, 45, 138);
 }
 
+.external {
+  color: #949494;
+}
+
 .trademark {
   display: flex;
   padding: 5px 15px;
   align-items: center;
-  color: #949494
 }
 
 .trademark svg * {

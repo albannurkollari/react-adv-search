@@ -26,8 +26,9 @@ import "./styles.css";
 
   ReactDOM.render(
     <>
+      <header>React Advanced Search</header>
       <main>
-        <Search rowsVisible={10} possibilities={Array.isArray(countries) ? countries : PEOPLE} />
+        <Search rowsVisible={8} possibilities={Array.isArray(countries) ? countries : PEOPLE} />
       </main>
       <footer>
         <Trademark>

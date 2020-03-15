@@ -1,17 +1,24 @@
 @import url('https://fonts.googleapis.com/css?family=Inter&display=swap');
 
+:root {
+  --maxWidth: 450px;
+}
+
 html, body{ 
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   overflow: auto;
 }
 
 body {
+  position: relative;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body, body * {
+  position: relative;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif, Calibri;
 }
@@ -19,23 +26,50 @@ body, body * {
 .root {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   margin: 0 auto;
   min-width: 50%;
-  max-width: 75%;
-  min-height: inherit;
+  height: 100%;
   width: 100%;
+  padding: 50px 20px;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  width: 100%;
+  max-width: var(--maxWidth);
+  font-size: 24px
+}
+
+header:before, header:after {
+  content: '';
+  position: absolute;
+  background-color: rgb(16, 67, 136);
+  width: 40%;
+  bottom: -5px;
+  left: 25%;
+  height: 8px;
+  transform: skewX(35deg);
+  z-index: 123;
+}
+
+header:after {
+  right: 25%;
+  left: unset;
+  transform: skewX(-35deg);
 }
 
 main {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
   min-width: 100px;
-  max-width: 450px;
+  max-width: var(--maxWidth);
   min-height: 400px;
-  padding: 50px 20px;
+  padding: 20px 10px;
   background-color: #f8f8f8;
   box-shadow: 0 15px 40px -10px rgba(120, 162, 199, 0.5);
   border-radius: 5px;
@@ -43,7 +77,6 @@ main {
 }
 
 footer {
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -51,19 +84,26 @@ footer {
   text-align: center;
   line-height: 1;
   overflow: hidden;
+  padding: 20px 10px;
   margin-top: 50px;
-  padding: 35px 50px;
 }
 
-footer {
-  position: relative;
-  height: 10%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  line-height: 1;
-  text-align: center;
-  line-height: 1;
+.screen-size span:nth-child(odd) {
+  font-weight: 700;
 }
 
+.screen-size span:nth-child(even) {
+  margin-left: 15px;
+}
+
+@media only screen and (min-device-width: 769px){ 
+  .root {
+    max-width: 75%;
+    justify-content: center;
+  }
+
+  footer {
+    max-width: var(--maxWidth);
+    font-size: 14px;
+  }
+}

@@ -3,7 +3,7 @@
   --rowGap: 1px;
   --maxRowsVisible: 5;
   --maxSearchListHeight: calc(var(--maxRowsVisible) * var(--rowHeight) + var(--maxRowsVisible) * var(--rowGap));
-  --smoothTrans: 0.15s all ease-in-out;
+  --smoothTrans: all 0.15s ease-in-out, color 0s;
   --iconWidth: 35px;
   --iconSize: 20px;
   --iconColorLight: rgb(0, 110, 255);
@@ -15,6 +15,8 @@
   --highlightedTextColor: rgba(0, 0, 0, 1);
   --arrowColor: rgb(0, 136, 226);
   --itemHoverBorderColor: rgba(0, 136, 226, 0.5);
+  --bgSelectedBlue-1: rgba(8,107,173,0.75);
+  --bgSelectedBlue-2: rgba(5,134,201,0.5);
 }
 
 .search-box__wrapper {
@@ -153,6 +155,16 @@
 
 .search-list > .item b {
   color: var(--highlightedTextColor);
+}
+
+.search-list > .item.selected {
+  --arrowColor: white;
+  background: var(--bgSelectedBlue-1);
+  background: linear-gradient(90deg, var(--bgSelectedBlue-1) 0%, var(--bgSelectedBlue-2) 100%);
+}
+
+.search-list > .item.selected * {
+  color: white !important;
 }
 
 .search-list > .item.selected,

@@ -9,6 +9,22 @@ import {scroll} from '../utils';
 // Constants
 import {CLS} from '../constants';
 
+// Memoized
+const removePrevSelected = prevElm => prevElm?.classList.remove(CLS.SELECTED);
+const removeNextSelected = nextElm => nextElm?.classList.remove(CLS.SELECTED);
+const addNextSelected = nextElm => nextElm?.classList.add(CLS.SELECTED);
+const [onAfterScroll, onResetScroll] = [
+  (prevElm, nextElm) => {
+    removePrevSelected(prevElm);
+    addNextSelected(nextElm);
+    nextElm?.click();
+  },
+  (prevElm, nextElm) => {
+    removePrevSelected(prevElm);
+    removeNextSelected(nextElm);
+  }
+];
+
 export const useSearch = (possibilities, onCallback) => {
   // REFS
   const inputSearchRef = useRef();
@@ -46,7 +62,7 @@ export const useSearch = (possibilities, onCallback) => {
       hasFoundItems = Boolean(_filtered.length);
     }
 
-    scroll.to({parent: searchListRef.current, isDisabled: true});
+    scroll.to({parent: searchListRef.current, isDisabled: true}, onResetScroll);
     setHasFoundSome(hasFoundItems);
     setFiltered(items || possibilities);
     setIsClean(!inputSearchRef.current.value.trim().length);
@@ -139,11 +155,7 @@ export const useSearch = (possibilities, onCallback) => {
       }
 
       evt.preventDefault();
-      scroll.to(_scroll, (prevElm, nextElm) => {
-        prevElm?.classList.remove(CLS.SELECTED);
-        nextElm?.classList.add(CLS.SELECTED);
-        nextElm?.click();
-      });
+      scroll.to(_scroll, onAfterScroll);
     }
 
   }, [hasFoundSome, menuIsPinned, filterItemList, manageSearchState]);
@@ -152,6 +164,7 @@ export const useSearch = (possibilities, onCallback) => {
   const onSearchBlur = useCallback(() => menuIsPinned ?? filterItemList(), [menuIsPinned, filterItemList]);
   const onItemSelect = useCallback(({target}) => {
     const listElm = target.closest(`.${CLS.ITEM}`,);
+    const prevSelectedElm = searchListRef.current.querySelector(`.${CLS.ITEM}.${CLS.SELECTED}`);
     const reportElm = target.closest(`.${CLS.REPORT}`)
 
     if (!(listElm instanceof Element) || reportElm) {
@@ -160,9 +173,15 @@ export const useSearch = (possibilities, onCallback) => {
 
     const foundItem = possibilities.find(({key}) => key === listElm.searchId) || {};
 
+    if (listElm === prevSelectedElm) {
+      return;
+    }
+    
     if (foundItem) {
       inputSearchRef.current.value = foundItem.value;
 
+      removePrevSelected(prevSelectedElm);
+      addNextSelected(listElm);
       onCallback?.(foundItem);
     }
 
