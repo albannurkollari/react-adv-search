@@ -16,7 +16,7 @@ import * as Icons from "../../assets/img";
 import {getAllCountries} from '../../api';
 
 // Constants
-import {CLS, PEOPLE} from "../../constants";
+import {PEOPLE} from "../../constants";
 
 // Stylesheet(s)
 import "./styles.css";
@@ -25,7 +25,7 @@ import "./styles.css";
 (async () => {
   const countries = await getAllCountries();
   const root = document.createElement('div');
-  root.className = CLS.ROOT;
+  root.className = 'root';
 
   ReactDOM.render(
     <>

@@ -4,7 +4,7 @@
 import {useEffect, useState, useCallback, useRef} from 'react';
 
 // Helpers
-import {classes, events, scroll} from '../utils';
+import {getClasses, events, scroll} from '../utils';
 
 // Constants
 import {CLS} from '../constants';
@@ -25,7 +25,7 @@ const [onAfterScroll, onResetScroll] = [
 ];
 const doNavigate = options => {
   const {list, pressed, menuIsPinned, hasFoundSome, onNavigate} = options;
-  const jointClasses = classes.get({[CLS.ITEM]: true, [CLS.FOUND]: !menuIsPinned}, true);
+  const jointClasses = getClasses({[CLS.ITEM]: true, [CLS.FOUND]: !menuIsPinned}, true);
   const itemsToScroll = [...list.querySelectorAll(jointClasses)];
   const selectedItemIndex = itemsToScroll.findIndex(item => item.classList.contains(CLS.SELECTED));
   const lastIndex = itemsToScroll.length - 1;
