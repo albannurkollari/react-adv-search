@@ -1,7 +1,10 @@
 import {getClasses, scroll} from "./DOM/common";
-import {toggleEvent} from "./DOM/events";
+import {getKeysPressed, toggleEvent} from "./DOM/events";
 
 const classes = {get: getClasses};
-const events = {init: toggleEvent};
+const events = {
+  keys: {getPressed: getKeysPressed},
+  init: toggleEvent
+};
 
 export {classes, events, scroll};

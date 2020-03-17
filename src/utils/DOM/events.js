@@ -2,6 +2,22 @@
 const EVENTS = {};
 window.EVENTS = EVENTS;
 
+export const getKeysPressed = (key, ctrl, shift) => {
+  const state = {
+    isCtrl: ctrl,
+    isShift: shift,
+    isEnter: key === 13,
+    isEsc: key === 27,
+    isEnd: key === 35,
+    isHome: key === 36,
+    isUp: key === 38,
+    isDown: key === 40
+  };
+  const [_key] = Object.entries(state).find(([, isPressed]) => isPressed) || [];
+
+  return {...state, isNavigating: /35|36|38|40/.test(key), ...(_key && {_key})};
+};
+
 /**
  * @description Curried function that returns an event toggling function scoped to an object
  * of `events`.

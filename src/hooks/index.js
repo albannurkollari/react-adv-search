@@ -1,10 +1,10 @@
 /* eslint-disable no-fallthrough */
 /* eslint-disable no-unused-expressions */
 // Libraries
-import {useEffect, useState, useCallback, useRef} from "react";
+import {useEffect, useState, useCallback, useRef} from 'react';
 
 // Helpers
-import {scroll} from '../utils';
+import {classes, events, scroll} from '../utils';
 
 // Constants
 import {CLS} from '../constants';
@@ -17,13 +17,36 @@ const [onAfterScroll, onResetScroll] = [
   (prevElm, nextElm) => {
     removePrevSelected(prevElm);
     addNextSelected(nextElm);
-    nextElm?.click();
   },
   (prevElm, nextElm) => {
     removePrevSelected(prevElm);
     removeNextSelected(nextElm);
   }
 ];
+const doNavigate = options => {
+  const {list, pressed, menuIsPinned, hasFoundSome, onNavigate} = options;
+  const jointClasses = classes.get({[CLS.ITEM]: true, [CLS.FOUND]: !menuIsPinned}, true);
+  const itemsToScroll = [...list.querySelectorAll(jointClasses)];
+  const selectedItemIndex = itemsToScroll.findIndex(item => item.classList.contains(CLS.SELECTED));
+  const lastIndex = itemsToScroll.length - 1;
+  let newIndex = {
+    isHome: 0,
+    isEnd: lastIndex,
+    isDown: selectedItemIndex + 1,
+    isUp: selectedItemIndex - 1,
+  }[pressed._key];
+
+  // Make sure new index is between these ranges.
+  newIndex = newIndex <= -1 ? 0 : newIndex > lastIndex ? lastIndex : newIndex;
+
+  const elm = itemsToScroll[newIndex];
+  const isDisabled = (list.scrollHeight === list.clientHeight) || !(list.classList.contains(CLS.PINNED) || hasFoundSome);
+
+  // Finally scroll to that child element in the list!
+  if (elm && !(pressed.isCtrl && pressed.isShift)) {
+    scroll.to({...scroll.getState(list), elm: itemsToScroll[newIndex], isDisabled}, onNavigate);
+  }
+};
 
 export const useSearch = (possibilities, onCallback) => {
   // REFS
@@ -47,7 +70,7 @@ export const useSearch = (possibilities, onCallback) => {
       const _nonFiltered = [];
 
       possibilities.forEach(({value, ...rest}) => {
-        const regex = new RegExp(`(${searchFor})`, "gi");
+        const regex = new RegExp(`(${searchFor})`, 'gi');
         const found = regex.test(value);
         const item = {...rest, value, ...(found && {regex})};
 
@@ -76,6 +99,8 @@ export const useSearch = (possibilities, onCallback) => {
 
     if (!show) {
       inputSearchRef.current.value = '';
+
+      setMenuIsPinned();
       filterItemList();
     }
 
@@ -84,41 +109,31 @@ export const useSearch = (possibilities, onCallback) => {
     }
   }, [filterItemList]);
 
+  const onItemSelect = useCallback(({target, prevTarget}) => {
+    const clickedItem = target.closest(`.${CLS.ITEM}`);
+    const prevSelectedItem = prevTarget ?? searchListRef.current.querySelector(`.${CLS.ITEM}.${CLS.SELECTED}`);
+
+    if (!(clickedItem instanceof Element)) {
+      return;
+    }
+
+    const {value = ''} = possibilities.find(({key}) => key === clickedItem?.searchId) || {};
+    inputSearchRef.current.value = value;
+    searchListRef.current.elmToScroll = clickedItem;
+
+    inputSearchRef.current.focus();
+    onAfterScroll(prevSelectedItem, clickedItem);
+    onCallback?.(value);
+  }, [possibilities, onCallback]);
+
   const onSearchKeydown = useCallback(evt => {
-    const list = searchListRef.current;
     const {keyCode, target, ctrlKey, shiftKey} = evt;
-    const {classList, clientHeight, scrollHeight, scrollTop} = list;
-    const _scroll = {
-      isDisabled: ctrlKey
-        || shiftKey
-        || (scrollHeight === clientHeight)
-        || !(classList.contains(CLS.PINNED) || hasFoundSome),
-      isAtStart: scrollTop === 0,
-      isInBetween: 0 < scrollTop && scrollTop < scrollHeight - clientHeight,
-      isAtEnd: scrollHeight - clientHeight === scrollTop,
-      parent: list
-    };
-    const pressed = {
-      isEnter: keyCode === 13,
-      isEsc: keyCode === 27,
-      isEnd: keyCode === 35,
-      isHome: keyCode === 36,
-      isUp: keyCode === 38,
-      isDown: keyCode === 40
-    };
-
-    const isNavigating = Object
-      .entries(pressed)
-      .some(([key, isPressed]) => /^is(end|home|up|down)$/i.test(key) && isPressed);
-
-    const prevOrNextProp = `${pressed.isUp ? 'previous' : 'next'}ElementSibling`;
+    const pressed = events.keys.getPressed(keyCode, ctrlKey, shiftKey);
 
     switch (true) {
-      case pressed.isEnter:
-        break;
       case pressed.isEsc:
-        if (target.value.trim() !== "") {
-          target.value = "";
+        if (target.value.trim() !== '') {
+          target.value = '';
         }
         else {
           manageSearchState({show: false});
@@ -126,68 +141,28 @@ export const useSearch = (possibilities, onCallback) => {
 
         filterItemList();
         break;
-      case pressed.isDown:
-      case pressed.isUp:
-        if (menuIsPinned && (_scroll.isAtStart || _scroll.isInBetween)) {
-          _scroll.elm = list.elmToScroll?.[prevOrNextProp] ?? list.querySelector(`.${CLS.ITEM}`);
-        }
-        else if (menuIsPinned && _scroll.isAtEnd) {
-          _scroll.elm = (list.elmToScroll ?? [...list.querySelectorAll(`.${CLS.ITEM}`)].pop())?.[prevOrNextProp];
-        }
-        else {
-          const allFound = [...list.querySelectorAll(`.${CLS.ITEM}.${CLS.FOUND}`)];
-          const selected = allFound.find(item => item.classList.contains(CLS.SELECTED));
-          const selectedIndex = allFound.indexOf(selected);
-          const newIndex = pressed.isUp
-            ? selectedIndex > -1 ? selectedIndex - 1 : 0
-            : selectedIndex > -1 ? selectedIndex + 1 : 0;
+      case pressed.isNavigating && (hasFoundSome || menuIsPinned):
+        evt.preventDefault();
+        doNavigate({
+          list: searchListRef.current,
+          pressed,
+          menuIsPinned,
+          hasFoundSome,
+          onNavigate: (prev, next) => onItemSelect({target: next, prevTarget: prev})
+        });
 
-          _scroll.elm = allFound[newIndex]
-        }
         break;
       default:
         return;
     }
-
-    if (isNavigating && (hasFoundSome || menuIsPinned)) {
-      if (_scroll.elm?.classList.contains(CLS.REPORT)) {
-        _scroll.elm = list.querySelector(`.${CLS.ITEM}`);
-      }
-
-      evt.preventDefault();
-      scroll.to(_scroll, onAfterScroll);
-    }
-
-  }, [hasFoundSome, menuIsPinned, filterItemList, manageSearchState]);
+  },
+    [hasFoundSome, menuIsPinned, onItemSelect, filterItemList, manageSearchState]
+  );
   const onSearch = useCallback(({target: {value}}) => filterItemList(value), [filterItemList]);
   const onSearchClick = useCallback(() => manageSearchState(), [manageSearchState]);
-  const onSearchBlur = useCallback(() => menuIsPinned ?? filterItemList(), [menuIsPinned, filterItemList]);
-  const onItemSelect = useCallback(({target}) => {
-    const listElm = target.closest(`.${CLS.ITEM}`,);
-    const prevSelectedElm = searchListRef.current.querySelector(`.${CLS.ITEM}.${CLS.SELECTED}`);
-    const reportElm = target.closest(`.${CLS.REPORT}`)
-
-    if (!(listElm instanceof Element) || reportElm) {
-      return;
-    }
-
-    const foundItem = possibilities.find(({key}) => key === listElm.searchId) || {};
-
-    if (listElm === prevSelectedElm) {
-      return;
-    }
-    
-    if (foundItem) {
-      inputSearchRef.current.value = foundItem.value;
-
-      removePrevSelected(prevSelectedElm);
-      addNextSelected(listElm);
-      onCallback?.(foundItem);
-    }
-
-  }, [possibilities, onCallback]);
   const onPinnClick = useCallback(() => {
     setMenuIsPinned(menuIsPinned ? undefined : true);
+    inputSearchRef.current?.focus();
     !isClean && !menuIsPinned && filterItemList(inputSearchRef.current.value);
   }, [isClean, menuIsPinned, setMenuIsPinned, filterItemList]);
 
@@ -215,7 +190,6 @@ export const useSearch = (possibilities, onCallback) => {
     onSearchKeydown,
     onSearch,
     onSearchClick,
-    onSearchBlur,
     onItemSelect,
     onPinnClick
   }
