@@ -55,6 +55,7 @@ export const useSearch = (possibilities, onCallback) => {
   const searchListRef = useRef();
 
   // STATES
+  const [isVisible, setIsVisible] = useState(false);
   const [filtered, setFiltered] = useState(possibilities);
   const [menuIsPinned, setMenuIsPinned] = useState();
   const [hasFoundSome, setHasFoundSome] = useState(false);
@@ -91,23 +92,23 @@ export const useSearch = (possibilities, onCallback) => {
     setIsClean(!inputSearchRef.current.value.trim().length);
   }, [possibilities, setFiltered, setIsClean]);
 
-  const manageSearchState = useCallback(({show, event} = {}) => {
-    const method = (show ?? !searchRowRef?.current.classList.contains(CLS.FOCUSED)) ? 'add' : 'remove';
+  const manageSearchState = useCallback(({show, resetInput} = {}) => {
+    const shouldShow = show ?? !searchRowRef?.current.classList.contains(CLS.FOCUSED);
 
-    // Toggle search visibility here.
-    searchRowRef?.current.classList[method]?.(CLS.FOCUSED);
-
-    if (!show) {
+    if (resetInput || !shouldShow) {
       inputSearchRef.current.value = '';
+    }
 
+    if (!shouldShow) {
       setMenuIsPinned();
       filterItemList();
     }
-
-    if (method === 'add') {
+    else {
       inputSearchRef?.current.focus();
     }
-  }, [filterItemList]);
+
+    setIsVisible(shouldShow);
+  }, [filterItemList, setIsVisible]);
 
   const onItemSelect = useCallback(({target, prevTarget}) => {
     const clickedItem = target.closest(`.${CLS.ITEM}`);
@@ -132,14 +133,9 @@ export const useSearch = (possibilities, onCallback) => {
 
     switch (true) {
       case pressed.isEsc:
-        if (target.value.trim() !== '') {
-          target.value = '';
-        }
-        else {
-          manageSearchState({show: false});
-        }
+        const hasInput = target.value.trim() !== '';
 
-        filterItemList();
+        manageSearchState({show: hasInput, resetInput: hasInput});
         break;
       case pressed.isNavigating && (hasFoundSome || menuIsPinned):
         evt.preventDefault();
@@ -156,15 +152,15 @@ export const useSearch = (possibilities, onCallback) => {
         return;
     }
   },
-    [hasFoundSome, menuIsPinned, onItemSelect, filterItemList, manageSearchState]
+    [hasFoundSome, menuIsPinned, onItemSelect, manageSearchState]
   );
   const onSearch = useCallback(({target: {value}}) => filterItemList(value), [filterItemList]);
   const onSearchClick = useCallback(() => manageSearchState(), [manageSearchState]);
   const onPinnClick = useCallback(() => {
     setMenuIsPinned(menuIsPinned ? undefined : true);
     inputSearchRef.current?.focus();
-    !isClean && !menuIsPinned && filterItemList(inputSearchRef.current.value);
-  }, [isClean, menuIsPinned, setMenuIsPinned, filterItemList]);
+    filterItemList(inputSearchRef.current.value);
+  }, [menuIsPinned, filterItemList]);
 
   useEffect(() => {
     if (!(searchListRef.current instanceof Element)) {
@@ -180,6 +176,7 @@ export const useSearch = (possibilities, onCallback) => {
   }, []);
 
   return {
+    isVisible,
     isClean,
     hasFoundSome,
     inputSearchRef,

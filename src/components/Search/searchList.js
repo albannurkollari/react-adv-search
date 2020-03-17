@@ -9,6 +9,7 @@ import {classes} from '../../helpers';
 import BoldText from '../BoldText';
 
 const SearchList = React.forwardRef(({
+  detached,
   list,
   labels,
   menuIsPinned,
@@ -18,7 +19,7 @@ const SearchList = React.forwardRef(({
 }, ref) => {
   return <div
     ref={ref}
-    className={classes.list({hasFoundSome, isClean, menuIsPinned})}
+    className={classes.list({detached, hasFoundSome, isClean, menuIsPinned})}
     onClick={onItemSelect}
   >
     {!isClean && <span className={classes.report}>{hasFoundSome ? labels.found : labels.notFound}</span>}
@@ -32,6 +33,7 @@ const SearchList = React.forwardRef(({
   </div>;
 });
 SearchList.propTypes = {
+  detached: PropTypes.bool,
   list: PropTypes.arrayOf(PropTypes.shape({
     key: PropTypes.string,
     value: PropTypes.string,
@@ -48,6 +50,7 @@ SearchList.propTypes = {
   onItemSelect: PropTypes.func.isRequired
 };
 SearchList.defaultProps = {
+  detached: false,
   list: [],
   labels: undefined,
   menuIsPinned: undefined,

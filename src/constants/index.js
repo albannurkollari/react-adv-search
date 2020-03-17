@@ -8,12 +8,13 @@ export const URLS = {COUNTRIES};
 
 export const CLS = {
   NO_GAP: 'no-gap',
+  PINNED: 'pinned',
   SEARCH_BOX: 'search-box__wrapper',
   SEARCH_BOX_WITH_PIN: 'with-pin',
   SEARCH_PINNER: 'pin-search-list',
   SEARCH_ROW: 'search-row',
   SEARCH_LIST: 'search-list',
-  PINNED: 'pinned',
+  SEARCH_LIST_DETACHED: 'detached',
   SEARCH_LIST_HAS_FOUND: 'has-found',
   SEARCH_LIST_NONE_FOUND: 'none-found',
   ITEM: 'item',

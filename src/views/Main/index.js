@@ -49,7 +49,11 @@ import "./styles.css";
             <Icons.Pin style={{margin: '0 4px'}} width={16} height={16} />.
           </div>
         </nav>
-        <Search rowsVisible={8} possibilities={Array.isArray(countries) ? countries : PEOPLE} />
+        <Search
+          detached={Boolean(localStorage.searchDetached)}
+          rowsVisible={localStorage.searchRows && Number(localStorage.searchRows)}
+          possibilities={Array.isArray(countries) ? countries : PEOPLE}
+        />
       </main>
       <footer>
         <Trademark>

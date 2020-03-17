@@ -5,7 +5,6 @@ import {getClasses} from '../utils';
 import {CLS} from '../constants';
 
 export const classes = ({
-  searchRow: CLS.SEARCH_ROW,
   searchIcon: CLS.SEARCH_ICON,
   searchRowBorder: CLS.SEARCH_ROW_BORDERS,
   pinner: CLS.SEARCH_PINNER,
@@ -15,8 +14,13 @@ export const classes = ({
     [CLS.SEARCH_BOX]: true,
     [CLS.SEARCH_BOX_WITH_PIN]: toggleList
   }),
-  list: ({hasFoundSome, isClean, menuIsPinned}) => getClasses({
+  row: ({isVisible}) => getClasses({
+    [CLS.SEARCH_ROW]: true,
+    [CLS.FOCUSED]: isVisible,
+  }),
+  list: ({detached, hasFoundSome, isClean, menuIsPinned}) => getClasses({
     [CLS.SEARCH_LIST]: true,
+    [CLS.SEARCH_LIST_DETACHED]: detached,
     [CLS.SEARCH_LIST_HAS_FOUND]: hasFoundSome,
     [CLS.SEARCH_LIST_NONE_FOUND]: !isClean && !hasFoundSome,
     [CLS.PINNED]: menuIsPinned
