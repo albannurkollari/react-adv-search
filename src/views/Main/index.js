@@ -9,6 +9,9 @@ import * as serviceWorker from "../../serviceWorker";
 import Search from "../../components/Search";
 import Trademark from "../../components/Trademark";
 
+// Images
+import * as Icons from "../../assets/img";
+
 // Helpers
 import {getAllCountries} from '../../api';
 
@@ -26,8 +29,26 @@ import "./styles.css";
 
   ReactDOM.render(
     <>
-      <header>React Advanced Search</header>
+      <header><h2>React Advanced Search</h2></header>
       <main>
+        <h3>So...how does it work?</h3>
+        <nav style={{marginBottom: '10px'}}>
+          <div className='step'>
+            1. Click the <Icons.Search style={{margin: '0 4px' }} width={16} height={16}/> to start searching.
+          </div>
+          <div className='step'>
+            2. Once the search bar appears start searching for any desired country.
+            <i style={{fontSize: '10px'}}>(disclaimer: the country data is provided by a public API)</i>
+          </div>
+          <div className='step'>
+            3. If your search yielded results, you can than start navigating with
+            <b> up</b>, <b>down</b>, <b>Home</b> and <b>End</b> keys.
+          </div>
+          <div className='step'>
+            4. You can aswell <b>pin/unpin</b> the options list by clicking on
+            <Icons.Pin style={{margin: '0 4px'}} width={16} height={16} />.
+          </div>
+        </nav>
         <Search rowsVisible={8} possibilities={Array.isArray(countries) ? countries : PEOPLE} />
       </main>
       <footer>

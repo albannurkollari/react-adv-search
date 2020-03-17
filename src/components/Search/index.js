@@ -38,7 +38,6 @@ const Search = ({
     onSearchKeydown,
     onSearch,
     onSearchClick,
-    onSearchBlur,
     onItemSelect
   } = useSearch(possibilities, onCallback);
 
@@ -70,7 +69,6 @@ const Search = ({
               alt="search"
               placeholder={searchPlaceholder}
               spellCheck={false}
-              /* onBlur={onSearchBlur} */
               onChange={onSearch}
               onKeyDown={onSearchKeydown}
             />

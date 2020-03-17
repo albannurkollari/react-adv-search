@@ -2,6 +2,7 @@
 
 :root {
   --maxWidth: 450px;
+  --headerBgColor: rgb(16, 67, 136);
 }
 
 html, body{ 
@@ -13,6 +14,8 @@ html, body{
 body {
   position: relative;
   margin: 0;
+  background: rgb(240,248,255);
+  background: radial-gradient(circle, rgba(240,248,255,1) 0%, rgba(10, 79, 165, 0.28) 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -24,14 +27,16 @@ body, body * {
 }
 
 .root {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  display: block;
+  width: 85%;
   margin: 0 auto;
-  min-width: 50%;
   height: 100%;
-  width: 100%;
-  padding: 50px 20px;
+  padding-top: 100px;
+}
+
+.root > * {
+  margin: 0 auto;
 }
 
 header {
@@ -41,39 +46,63 @@ header {
   padding: 5px;
   width: 100%;
   max-width: var(--maxWidth);
-  font-size: 24px
+  color: white;
+  font-size: 20px;
+}
+
+header, header:before, header:after{
+  background-color: var(--headerBgColor);
 }
 
 header:before, header:after {
   content: '';
   position: absolute;
-  background-color: rgb(16, 67, 136);
   width: 40%;
   bottom: -5px;
-  left: 25%;
+  left: 20%;
   height: 8px;
-  transform: skewX(35deg);
-  z-index: 123;
+  transform: perspective(1px) skewX(75deg);
+  z-index: 1;
+  backface-visibility: hidden;
 }
 
 header:after {
-  right: 25%;
+  right: 20%;
   left: unset;
-  transform: skewX(-35deg);
+  transform: perspective(1px) skewX(-75deg);
+}
+
+header > h2 {
+  margin: 10px 0;
 }
 
 main {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
   min-width: 100px;
   max-width: var(--maxWidth);
   min-height: 400px;
-  padding: 20px 10px;
+  padding: 10px;
   background-color: #f8f8f8;
   box-shadow: 0 15px 40px -10px rgba(120, 162, 199, 0.5);
   border-radius: 5px;
   overflow: hidden;
+}
+
+main > h3 {
+  padding: 0 10px;
+}
+
+.step {
+  display: inline-block;
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%;
+  padding: 4px 10px;
+  line-height: 1.5;
+  text-align: justify;
 }
 
 footer {
