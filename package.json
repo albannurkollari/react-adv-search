@@ -8,20 +8,15 @@
   "main": "src/browsercheck.js",
   "dependencies": {
     "css-vars-ponyfill": "^2.4.2",
-    "ie11-custom-properties": "^4.1.0"
+    "ie11-custom-properties": "^4.1.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "^4.0.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
-    "@testing-library/user-event": "^12.5.0",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "^4.0.1"
-  },
-  "peerDependencies": {
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "^4.0.1"
+    "@testing-library/user-event": "^12.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
