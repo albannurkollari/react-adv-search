@@ -13,10 +13,10 @@ import Trademark from "../../components/Trademark";
 import * as Icons from "../../assets/img";
 
 // Helpers
-import {getAllCountries} from '../../api';
+import { getAllCountries } from "../../api";
 
 // Constants
-import {PEOPLE} from "../../constants";
+import { PEOPLE } from "../../constants";
 
 // Stylesheet(s)
 import "./styles.css";
@@ -24,8 +24,8 @@ import "./styles.css";
 // Start the app
 (async () => {
   const countries = await getAllCountries();
-  const root = document.createElement('div');
-  root.className = 'root';
+  const root = document.createElement("div");
+  root.className = "root";
 
   ReactDOM.render(
     <>
@@ -58,11 +58,9 @@ import "./styles.css";
           </div>
           <div className="step">
             5. If you press <b>Esc</b> once, it will close the results panel.
-            Pressing <b>Esc</b> for the 2nd time clears the search completely!
           </div>
         </nav>
         <Search
-          detached={Boolean(localStorage.searchDetached)}
           rowsVisible={
             localStorage.searchRows && Number(localStorage.searchRows)
           }

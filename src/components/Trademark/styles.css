@@ -31,3 +31,7 @@
   border-radius: 15%;
   margin: 0 5px;
 }
+
+.github-sponsorship html {
+  background-color: var(--bgColor);
+}

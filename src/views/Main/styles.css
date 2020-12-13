@@ -1,11 +1,17 @@
-@import url('https://fonts.googleapis.com/css?family=Inter&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Inter&display=swap");
 
 :root {
   --maxWidth: 450px;
   --headerBgColor: rgb(16, 67, 136);
+  --bgColor: radial-gradient(
+    circle,
+    rgba(240, 248, 255, 1) 0%,
+    rgba(10, 79, 165, 0.28) 100%
+  );
 }
 
-html, body{ 
+html,
+body {
   min-height: 100%;
   height: 100%;
   overflow: auto;
@@ -14,16 +20,17 @@ html, body{
 body {
   position: relative;
   margin: 0;
-  background: rgb(240,248,255);
-  background: radial-gradient(circle, rgba(240,248,255,1) 0%, rgba(10, 79, 165, 0.28) 100%);
+  background: rgb(240, 248, 255);
+  background: var(--bgColor);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body, body * {
+body,
+body * {
   position: relative;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif, Calibri;
+  font-family: "Inter", sans-serif, Calibri;
 }
 
 .root {
@@ -50,12 +57,15 @@ header {
   font-size: 20px;
 }
 
-header, header:before, header:after{
+header,
+header:before,
+header:after {
   background-color: var(--headerBgColor);
 }
 
-header:before, header:after {
-  content: '';
+header:before,
+header:after {
+  content: "";
   position: absolute;
   width: 40%;
   bottom: -5px;
@@ -125,7 +135,7 @@ footer {
   margin-left: 15px;
 }
 
-@media only screen and (min-device-width: 769px){ 
+@media only screen and (min-device-width: 769px) {
   .root {
     max-width: 75%;
     justify-content: center;
